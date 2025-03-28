@@ -1,4 +1,10 @@
-@import "tailwindcss";
+@import "tailwindcss/preflight";
+@import "tailwindcss/base";
+@import "tailwindcss/components";
+@import "tailwindcss/utilities";
+
+@import url("https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,100;1,400&display=swap");
+@import url('https://fonts.googleapis.com/css2?family=Funnel+Display:wght@485&display=swap');
 
 :root {
   --background: #ffffff;
