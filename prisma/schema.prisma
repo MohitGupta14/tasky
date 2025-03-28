@@ -1,15 +1,38 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
+// schema.prisma
 
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
-generator client {
-  provider = "prisma-client-js"
-  output = "../app/generated/prisma"
+// Define the datasource (e.g., PostgreSQL, MySQL, SQLite)
+datasource db {
+  provider = "postgresql" // You can change this to "mysql", "sqlite", or others depending on your database
+  url      = env("DATABASE_URL")
 }
 
-datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+// Define the generator for Prisma Client
+generator client {
+  provider = "prisma-client-js"
+}
+
+// Enum for the status of progress
+enum ProgressStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  FAILED
+}
+
+model User {
+  id            Int      @id @default(autoincrement())
+  name          String
+  email         String   @unique
+  profilePicture String?  // Optional profile picture field (URL or path)
+  tasks         Task[]   // One-to-many relationship with Task
+}
+
+model Task {
+  id        Int      @id @default(autoincrement())
+  name      String
+  userId    Int      // Foreign key to User
+  user      User     @relation(fields: [userId], references: [id])
+  createdAt DateTime       @default(now()) // Timestamp for when the progress was created
+  updatedAt DateTime       @updatedAt // Timestamp for when the progress was last updated
+  status    ProgressStatus // Use the enum for progress status
 }
