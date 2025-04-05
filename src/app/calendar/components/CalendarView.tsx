@@ -163,7 +163,7 @@ export default function CalendarView() {
                 
                 <div className="mt-1 space-y-1 overflow-y-auto max-h-10 sm:max-h-13">
                   {tasksOnDay.length > 0 ? (
-                    tasksOnDay.slice(0, 3).map((task, i) => (
+                    tasksOnDay.slice(0, 3).map((task) => (
                       <div 
                         key={task.id}
                         className="flex items-center truncate text-xs"
