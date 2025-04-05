@@ -9,10 +9,11 @@ interface Task {
   eventDate: string;
 }
 
-export default function TaskSidebar() {
+export default function NavigationWithTaskSidebar() {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [filter, setFilter] = useState<ProgressStatus | 'ALL'>('ALL');
   const [deletingTaskId, setDeletingTaskId] = useState<number | null>(null);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   // Fetch tasks from localStorage or API if localStorage is empty
   useEffect(() => {
@@ -39,6 +40,40 @@ export default function TaskSidebar() {
       fetchTasks();
     }
   }, []);
+
+  // Close sidebar when clicking outside on mobile
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const sidebar = document.getElementById('task-sidebar');
+      const hamburger = document.getElementById('hamburger-button');
+      
+      if (isSidebarOpen && 
+          sidebar && 
+          hamburger && 
+          !sidebar.contains(event.target as Node) && 
+          !hamburger.contains(event.target as Node)) {
+        setIsSidebarOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isSidebarOpen]);
+
+  // Prevent body scrolling when sidebar is open on mobile
+  useEffect(() => {
+    if (isSidebarOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'auto';
+    }
+
+    return () => {
+      document.body.style.overflow = 'auto';
+    };
+  }, [isSidebarOpen]);
 
   const filteredTasks = filter === 'ALL' 
     ? tasks 
@@ -91,7 +126,6 @@ export default function TaskSidebar() {
     }
   };
   
-
   const getStatusColor = (status: ProgressStatus) => {
     switch(status) {
       case ProgressStatus.PENDING:
@@ -105,85 +139,149 @@ export default function TaskSidebar() {
     }
   };
 
+  const toggleSidebar = () => {
+    setIsSidebarOpen(!isSidebarOpen);
+  };
+
   return (
-    <div className="bg-gray-50 p-4 rounded-lg shadow-sm">
-      <h2 className="text-xl text-gray-700 font-bold mb-4">Tasks</h2>
+    <div className="relative">
+      {/* Hamburger Menu Button */}
+      <button 
+        id="hamburger-button"
+        onClick={toggleSidebar} 
+        className="fixed top-4 right-4 z-50 p-2 rounded-md bg-blue-500 text-white hover:bg-blue-600 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-300"
+        aria-label={isSidebarOpen ? "Close menu" : "Open menu"}
+        aria-expanded={isSidebarOpen}
+      >
+        {isSidebarOpen ? (
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        ) : (
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
+        )}
+      </button>
       
-      <div className="mb-6">
-        <label className="block text-gray-700 mb-2">Filter Tasks</label>
-        <select 
-          value={filter}
-          onChange={(e) => setFilter(e.target.value as ProgressStatus | 'ALL')}
-          className="w-full px-3 py-2 border rounded text-gray-700 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
-        >
-          <option value="ALL">All Tasks</option>
-          {Object.values(ProgressStatus).map(status => (
-            <option key={status} value={status}>
-              {status}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      {/* Task list with scrollbar */}
-      <div className="space-y-3 overflow-y-auto max-h-96"> {/* Scrollable task container */}
-        {filteredTasks.map(task => (
-          <div 
-            key={task.id} 
-            className={`
-              relative p-4 rounded-md shadow-sm border 
-              ${getStatusColor(task.status)}
-              transition-all duration-200
-            `}
-          >
+      {/* Overlay - only shown on mobile when sidebar is open */}
+      {isSidebarOpen && (
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden"
+          onClick={() => setIsSidebarOpen(false)}
+          aria-hidden="true"
+        />
+      )}
+      
+      {/* Task Sidebar */}
+      <div 
+        id="task-sidebar"
+        className={`
+          fixed top-0 right-0 h-full w-full max-w-sm bg-white z-40 shadow-lg transform transition-transform duration-300 ease-in-out 
+          ${isSidebarOpen ? 'translate-x-0' : 'translate-x-full'}
+          md:translate-x-0 md:static md:shadow-none md:w-auto md:max-w-none
+        `}
+      >
+        <div className="h-full overflow-y-auto p-4 md:p-5">
+          <div className="md:hidden flex justify-between items-center mb-6">
+            <h2 className="text-xl text-gray-800 font-bold">Tasks Dashboard</h2>
             <button
-              onClick={() => handleDeleteTask(task.id)}
-              disabled={deletingTaskId === task.id}
-              className="absolute top-3 right-3 text-gray-500 hover:text-red-500 transition-colors disabled:opacity-50"
-              aria-label={`Delete task ${task.name}`}
+              onClick={() => setIsSidebarOpen(false)}
+              className="text-gray-500 hover:text-gray-800"
+              aria-label="Close sidebar"
             >
-              {deletingTaskId === task.id ? (
-                <svg className="animate-spin h-5 w-5 text-red-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-              ) : (
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M3 6h18"></path>
-                  <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
-                  <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
-                </svg>
-              )}
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
             </button>
+          </div>
+          
+          <div className="bg-gray-50 p-4 rounded-lg shadow-sm">
+            <h2 className="text-xl text-gray-700 font-bold mb-4">Tasks</h2>
+            
+            <div className="mb-6">
+              <label className="block text-gray-700 mb-2">Filter Tasks</label>
+              <select 
+                value={filter}
+                onChange={(e) => setFilter(e.target.value as ProgressStatus | 'ALL')}
+                className="w-full px-3 py-2 border rounded text-gray-700 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+              >
+                <option value="ALL">All Tasks</option>
+                {Object.values(ProgressStatus).map(status => (
+                  <option key={status} value={status}>
+                    {status}
+                  </option>
+                ))}
+              </select>
+            </div>
 
-            <div className="flex flex-col pr-6">
-              <span className="font-medium text-gray-800 mb-1">{task.name}</span>
-              <div className="flex justify-between items-center">
-                <span className="text-xs text-gray-500">
-                  {task.eventDate ? formatDate(task.eventDate) : 'No date set'}
-                </span>
-                <span className={`
-                  text-xs px-2 py-1 rounded-full font-medium
-                  ${task.status === ProgressStatus.PENDING ? 'bg-yellow-200 text-yellow-800' : 
-                    task.status === ProgressStatus.IN_PROGRESS ? 'bg-blue-200 text-blue-800' : 
-                    task.status === ProgressStatus.COMPLETED ? 'bg-green-200 text-green-800' : 
-                    'bg-red-200 text-red-800'}
-                `}>
-                  {task.status}
-                </span>
-              </div>
+            {/* Task list with scrollbar */}
+            <div className="space-y-3 overflow-y-auto max-h-96 md:max-h-[calc(100vh-200px)]">
+              {filteredTasks.map(task => (
+                <div 
+                  key={task.id} 
+                  className={`
+                    relative p-4 rounded-md shadow-sm border 
+                    ${getStatusColor(task.status)}
+                    transition-all duration-200
+                  `}
+                >
+                  <button
+                    onClick={() => handleDeleteTask(task.id)}
+                    disabled={deletingTaskId === task.id}
+                    className="absolute top-3 right-3 text-gray-500 hover:text-red-500 transition-colors disabled:opacity-50"
+                    aria-label={`Delete task ${task.name}`}
+                  >
+                    {deletingTaskId === task.id ? (
+                      <svg className="animate-spin h-5 w-5 text-red-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                    ) : (
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M3 6h18"></path>
+                        <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
+                        <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
+                      </svg>
+                    )}
+                  </button>
+
+                  <div className="flex flex-col pr-6">
+                    <span className="font-medium text-gray-800 mb-1">{task.name}</span>
+                    <div className="flex justify-between items-center">
+                      <span className="text-xs text-gray-500">
+                        {task.eventDate ? formatDate(task.eventDate) : 'No date set'}
+                      </span>
+                      <span className={`
+                        text-xs px-2 py-1 rounded-full font-medium
+                        ${task.status === ProgressStatus.PENDING ? 'bg-yellow-200 text-yellow-800' : 
+                          task.status === ProgressStatus.IN_PROGRESS ? 'bg-blue-200 text-blue-800' : 
+                          task.status === ProgressStatus.COMPLETED ? 'bg-green-200 text-green-800' : 
+                          'bg-red-200 text-red-800'}
+                      `}>
+                        {task.status}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+
+              {filteredTasks.length === 0 && (
+                <div className="text-center text-gray-500 py-8 bg-gray-100 rounded-md border border-gray-200">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 mx-auto mb-3 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                  </svg>
+                  <p>No tasks found</p>
+                </div>
+              )}
             </div>
           </div>
-        ))}
-
-        {filteredTasks.length === 0 && (
-          <div className="text-center text-gray-500 py-8 bg-gray-100 rounded-md border border-gray-200">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 mx-auto mb-3 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-            </svg>
-            <p>No tasks found</p>
-          </div>
-        )}
+        </div>
+      </div>
+      
+      {/* Your main content would go here */}
+      <div className={`transition-all duration-300 ${isSidebarOpen ? 'md:pr-80' : ''}`}>
+        {/* Main content */}
       </div>
     </div>
   );
