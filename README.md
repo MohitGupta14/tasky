@@ -14,13 +14,13 @@ This project is a web application built with Next.js that provides a calendar vi
 * **Database** Postgres is used to store the data and prisma as ORM
 * **Responsive Design:** The layout adapts to different screen sizes, including a hamburger menu for the task sidebar on mobile.
 
-##UI
+## UI
 ![image](https://github.com/user-attachments/assets/8b360843-668f-4ffb-a278-0c753ed52cb3)
 
-##Set Up
+## SetUp
 
 ```bash
 git clone https://github.com/MohitGupta14/tasky
-cd <repository_name>
+cd tasky
 npm i
 npm run dev
