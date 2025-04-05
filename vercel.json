@@ -1,0 +1,17 @@
+{
+    "builds": [
+      {
+        "src": "src/pages/api/**",
+        "use": "@vercel/node"
+      }
+    ],
+    "build": {
+      "env": {
+        "DATABASE_URL": "@your-database-url"
+      },
+      "commands": {
+        "build": "npm run prisma:generate"
+      }
+    }
+  }
+  
