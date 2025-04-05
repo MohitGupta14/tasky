@@ -2,11 +2,11 @@
 import React from 'react';
 import { Github } from 'lucide-react';
 import { signIn } from "next-auth/react";
-import './globals.css';
+import './styles/globals.css';
 
 const SignInPage = () => {
   const handleGoogleSignIn = () => {
-    signIn("google", { callbackUrl: "/dashboard" });
+    signIn("google", { callbackUrl: "/calendar" });
   };
 
   return (

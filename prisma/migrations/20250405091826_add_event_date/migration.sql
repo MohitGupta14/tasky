@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE "Task" ALTER COLUMN "eventDate" DROP DEFAULT,
+ALTER COLUMN "eventDate" SET DATA TYPE TEXT;

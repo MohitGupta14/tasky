@@ -30,18 +30,55 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { name, userId, status } = await req.json();
-
+    const { name, userId, status, eventDate } = await req.json();
+  
     const newTask = await prisma.task.create({
       data: {
         name,
         userId,
-        status: status || ProgressStatus.PENDING
+        status: status || ProgressStatus.PENDING,
+        eventDate : new Date(eventDate),
       }
     });
+
 
     return NextResponse.json(newTask, { status: 201 });
   } catch (error) {
     return NextResponse.json({ error: 'Failed to create task' + error }, { status: 500 });
+  }
+}
+
+export async function DELETE(request: NextRequest) {
+  try {
+    const { taskId } = await request.json(); // Assuming taskId is sent in the request body
+
+    if (!taskId) {
+      return NextResponse.json({ error: 'Task ID is required' }, { status: 400 });
+    }
+
+    // Check if the task exists
+    const task = await prisma.task.findUnique({
+      where: { id: taskId },
+    });
+
+    if (!task) {
+      return NextResponse.json({ error: 'Task not found' }, { status: 404 });
+    }
+
+    // Optionally, check for authorization if the task belongs to the user
+    const session = await getServerSession(authOptions);
+    if (!session ) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    // Delete the task
+    await prisma.task.delete({
+      where: { id: taskId },
+    });
+
+    return NextResponse.json({ message: 'Task deleted successfully' }, { status: 200 });
+  } catch (error) {
+    console.error(error); // For logging the error
+    return NextResponse.json({ error: 'Failed to delete task: ' + error }, { status: 500 });
   }
 }
