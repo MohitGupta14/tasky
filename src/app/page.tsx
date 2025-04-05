@@ -1,6 +1,6 @@
 "use client";
 import React from 'react';
-import { Github } from 'lucide-react';
+import { FaGoogle } from 'react-icons/fa';
 import { signIn } from "next-auth/react";
 import './styles/globals.css';
 
@@ -31,7 +31,7 @@ const SignInPage = () => {
               onClick={handleGoogleSignIn}
               className="w-full py-3 px-4 bg-white border border-gray-300 rounded-lg flex items-center justify-center space-x-3 hover:bg-gray-50 transition-colors shadow-sm hover:shadow-md"
             >
-              <Github className="w-5 h-5 text-red-500" />
+              <FaGoogle className="w-5 h-5 text-red-500" />
               <span className="font-semibold text-gray-700">Continue with Google</span>
             </button>
           </div>
