@@ -1,23 +1,9 @@
 {
   "version": 2,
-  "builds": [
-    {
-      "src": "package.json",
-      "use": "@vercel/next"
-    }
-  ],
-  "routes": [
-    {
-      "src": "/api/(.*)",
-      "dest": "/api/$1"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/$1"
-    }
-  ],
+  "buildCommand": "npm run build",
+  "installCommand": "npm install",
+  "framework": "nextjs",
   "env": {
     "DATABASE_URL": "postgresql://tasky_r9sz_user:clofV5CGqwksTyf2hy5vxa1VGeubz9kT@dpg-cvj3etpr0fns73eb8hvg-a.oregon-postgres.render.com/tasky_r9sz"
-  },
-  "buildCommand": "npm run prisma:generate && npm run build"
+  }
 }
