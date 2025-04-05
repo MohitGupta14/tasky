@@ -1,17 +1,12 @@
 {
-    "builds": [
-      {
-        "src": "src/pages/api/**",
-        "use": "@vercel/node"
-      }
-    ],
-    "build": {
-      "env": {
-        "DATABASE_URL": "postgresql://tasky_r9sz_user:clofV5CGqwksTyf2hy5vxa1VGeubz9kT@dpg-cvj3etpr0fns73eb8hvg-a.oregon-postgres.render.com/tasky_r9sz"
-      },
-      "commands": {
-        "build": "npm run prisma:generate"
-      }
+  "builds": [
+    {
+      "src": "src/pages/api/**",
+      "use": "@vercel/node"
     }
-  }
-  
+  ],
+  "env": {
+    "DATABASE_URL": "postgresql://tasky_r9sz_user:clofV5CGqwksTyf2hy5vxa1VGeubz9kT@dpg-cvj3etpr0fns73eb8hvg-a.oregon-postgres.render.com/tasky_r9sz"
+  },
+  "buildCommand": "npm run prisma:generate"
+}
