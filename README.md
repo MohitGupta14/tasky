@@ -1,4 +1,4 @@
-# Task Management Calendar
+# Tasky
 
 This project is a web application built with Next.js that provides a calendar view for managing tasks. Users can view tasks on specific dates, create new tasks, and manage their status. A sidebar provides a dashboard for viewing and filtering all tasks.
 
