@@ -2,7 +2,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { PrismaClient, ProgressStatus } from '@prisma/client';
 import { getServerSession } from 'next-auth';
-import { authOptions } from '@/app/api/auth/[...nextauth]/route';
+import {authOptions}  from "@/app/authoptions";
 
 const prisma = new PrismaClient();
 
@@ -19,7 +19,7 @@ export async function GET(
 
     return NextResponse.json(tasks, { status: 200 });
   } catch (error) {
-    return NextResponse.json({ error: 'Failed to fetch user tasks' }, { status: 500 });
+    return NextResponse.json({ error: 'Failed to fetch user tasks' + error }, { status: 500 });
   }
 }
 
@@ -47,6 +47,6 @@ export async function POST(
 
     return NextResponse.json(newTask, { status: 201 });
   } catch (error) {
-    return NextResponse.json({ error: 'Failed to create task' }, { status: 500 });
+    return NextResponse.json({ error: 'Failed to create task' + error }, { status: 500 });
   }
 }

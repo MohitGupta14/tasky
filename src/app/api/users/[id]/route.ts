@@ -2,7 +2,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
 import { getServerSession } from 'next-auth';
-import { authOptions } from '@/app/api/auth/[...nextauth]/route';
+import { authOptions } from '../../../authoptions';
 
 const prisma = new PrismaClient();
 
@@ -23,7 +23,7 @@ export async function GET(
 
     return NextResponse.json(user, { status: 200 });
   } catch (error) {
-    return NextResponse.json({ error: 'Failed to fetch user' }, { status: 500 });
+    return NextResponse.json({ error: 'Failed to fetch user' + error }, { status: 500 });
   }
 }
 
@@ -51,7 +51,7 @@ export async function PUT(
 
     return NextResponse.json(updatedUser, { status: 200 });
   } catch (error) {
-    return NextResponse.json({ error: 'Failed to update user' }, { status: 500 });
+    return NextResponse.json({ error: 'Failed to update user ' + error}, { status: 500 });
   }
 }
 
@@ -74,6 +74,6 @@ export async function DELETE(
 
     return NextResponse.json({ message: 'User deleted successfully' }, { status: 200 });
   } catch (error) {
-    return NextResponse.json({ error: 'Failed to delete user' }, { status: 500 });
+    return NextResponse.json({ error: 'Failed to delete user' + error }, { status: 500 });
   }
 }

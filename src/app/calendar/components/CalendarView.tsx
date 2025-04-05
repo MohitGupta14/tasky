@@ -3,12 +3,6 @@ import React, { useState } from 'react';
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, startOfWeek, endOfWeek } from 'date-fns';
 import CreateTaskModal from './CreateTaskModal';
 
-interface CalendarDay {
-  date: Date;
-  isCurrentMonth: boolean;
-  tasks?: any[];
-}
-
 export default function CalendarView() {
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [isModalOpen, setIsModalOpen] = useState(false);

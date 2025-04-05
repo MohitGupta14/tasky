@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
 import { getServerSession } from 'next-auth';
-import { authOptions } from '@/app/api/auth/[...nextauth]/route';
+import { authOptions } from "@/app/authoptions";
 
 const prisma = new PrismaClient();
 
-export async function GET(req: NextRequest) {
+export async function GET() {
   try {
     const users = await prisma.user.findMany({
       select: {
@@ -18,7 +18,7 @@ export async function GET(req: NextRequest) {
     });
     return NextResponse.json(users, { status: 200 });
   } catch (error) {
-    return NextResponse.json({ error: 'Failed to fetch users' }, { status: 500 });
+    return NextResponse.json({ error: 'Failed to fetch users' + error}, { status: 500 });
   }
 }
 
@@ -41,6 +41,6 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json(newUser, { status: 201 });
   } catch (error) {
-    return NextResponse.json({ error: 'Failed to create user' }, { status: 500 });
+    return NextResponse.json({ error: 'Failed to create user' + error}, { status: 500 });
   }
 }
