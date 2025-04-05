@@ -165,11 +165,11 @@ export default function CalendarView() {
                   )}
                 </div>
                 
-                {tasksOnDay.length > 0 && (
+                {/* {tasksOnDay.length > 0 && (
                   <div className="flex justify-center mt-1">
                     <span className="text-xs font-medium text-blue-600">{tasksOnDay.length} task{tasksOnDay.length !== 1 ? 's' : ''}</span>
                   </div>
-                )}
+                )} */}
               </div>
             );
           })

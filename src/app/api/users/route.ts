@@ -5,20 +5,38 @@ import { authOptions } from "@/app/authoptions";
 
 const prisma = new PrismaClient();
 
-export async function GET() {
+export async function GET(req: NextRequest) {
   try {
-    const users = await prisma.user.findMany({
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        profilePicture: true,
-        tasks: true
-      }
+    // Get the session to ensure the user is authenticated
+    const session = await getServerSession(authOptions);
+    if (!session) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    // Extract the email from the query parameters
+    const { searchParams } = new URL(req.url);
+    const email = searchParams.get('email'); // Assuming the email is passed as a query parameter
+
+    if (!email) {
+      return NextResponse.json({ error: 'Email is required' }, { status: 400 });
+    }
+
+    // Query the user by email
+    const user = await prisma.user.findUnique({
+      where: {
+        email: email,
+      },
     });
-    return NextResponse.json(users, { status: 200 });
+
+    if (!user) {
+      return NextResponse.json({ error: 'User not found' }, { status: 404 });
+    }
+
+    // Return the found user data
+    return NextResponse.json(user, { status: 200 });
   } catch (error) {
-    return NextResponse.json({ error: 'Failed to fetch users' + error}, { status: 500 });
+    console.error(error);
+    return NextResponse.json({ error: 'Failed to fetch user' }, { status: 500 });
   }
 }
 

@@ -12,9 +12,14 @@ export async function GET() {
     if (!session) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
-
+    
     const tasks = await prisma.task.findMany({
-      include: { user: true }
+      include: { user: true },
+      where: {
+        user:{
+          email: session.user?.email,
+        }
+      },
     });
 
     return NextResponse.json(tasks, { status: 200 });
@@ -30,12 +35,18 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { name, userId, status, eventDate } = await req.json();
-  
+    const { name, status, eventDate } = await req.json();
+
+    if (!name ) {
+      return NextResponse.json({ error: 'Name are required' }, { status: 400 });
+    }
+
     const newTask = await prisma.task.create({
       data: {
         name,
-        userId,
+        user: {
+          connect: { email: session.user?.email },
+        },
         status: status || ProgressStatus.PENDING,
         eventDate : new Date(eventDate),
       }
