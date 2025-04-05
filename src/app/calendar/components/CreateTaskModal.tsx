@@ -4,12 +4,7 @@ import { format } from 'date-fns';
 import { ProgressStatus } from '@prisma/client';
 import { useSession } from 'next-auth/react';
 import '../../styles/globals.css';
-
-interface CreateTaskModalProps {
-  date: Date | null;
-  onClose: () => void;
-  onTaskCreated?: (newTask: any) => void;
-}
+import axios from 'axios';
 
 interface Task {
   id: string;
@@ -19,6 +14,12 @@ interface Task {
   userId: string;
 }
 
+interface CreateTaskModalProps {
+  date: Date | null;
+  onClose: () => void;
+  onTaskCreated?: (newTask: Task) => void;
+}
+
 export default function CreateTaskModal({ date, onClose, onTaskCreated }: CreateTaskModalProps) {
   const [taskName, setTaskName] = useState('');
   const [status, setStatus] = useState<ProgressStatus>(ProgressStatus.PENDING);
@@ -26,12 +27,13 @@ export default function CreateTaskModal({ date, onClose, onTaskCreated }: Create
   const [isLoading, setIsLoading] = useState(false);
   
   // Getting the session data
-  const { data: session, status: sessionStatus } = useSession();
+  const { data: session } = useSession();
 
   useEffect(() => {
     if (date) {
       setEventDate(date);
     }
+
   }, [date]);
 
   // Handle task creation
@@ -43,53 +45,56 @@ export default function CreateTaskModal({ date, onClose, onTaskCreated }: Create
       console.error('User is not authenticated');
       return;
     }
-
+  
     setIsLoading(true);
-
+  
     try {
-      // Create a new task object
-      const newTask: Partial<Task> = {
-        id: `task_${Date.now()}`, // Generate a temporary ID
+      // Make the API call to create the task
+      const response = await axios.post('/api/tasks', {
         name: taskName,
         status,
         eventDate,
-        userId: session.user.id
+      });
+  
+      console.log('Response:', response);
+  
+      // Assuming the API responds with the created task
+      const newTask: Task = {
+        id: response.data.id, // The API should return the new task's ID
+        name: taskName,
+        status,
+        eventDate,
+        userId: session.user.id, // Add user ID from the session
       };
-
+  
       // Store in localStorage
       const existingTasks = JSON.parse(localStorage.getItem('tasks') || '[]');
       localStorage.setItem('tasks', JSON.stringify([...existingTasks, newTask]));
-      
-      // Make API call
-      const response = await fetch('/api/tasks', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          name: taskName,
-          status,
-          eventDate,
-        }),
-      });
-
-      if (response.ok) {
-        // If we have an onTaskCreated callback, call it with the new task
+  
+      // Check if the response is successful (201 for creation)
+      if (response.status === 201) {
+        // If onTaskCreated callback is passed, call it with the new task
         if (onTaskCreated) {
-          const createdTask = await response.json();
-          onTaskCreated(createdTask);
+          onTaskCreated(newTask);
         }
+  
+        // Close the modal or reset any form fields
         onClose();
-        window.location.reload();
+  
+        // Optionally refresh the page (uncomment if needed)
+        // window.location.reload();
+        console.log(localStorage.getItem('tasks'));
       } else {
-        console.error('Failed to create task');
+        console.error('Failed to create task', response.status, response.data);
       }
     } catch (error) {
       console.error('Error creating task:', error);
     } finally {
       setIsLoading(false);
+      window.location.reload();
     }
   };
+  
 
   return (
     <div className="fixed inset-0 bg-gray-900 bg-opacity-70 flex items-center justify-center z-50">

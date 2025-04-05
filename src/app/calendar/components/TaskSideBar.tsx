@@ -55,37 +55,42 @@ export default function TaskSidebar() {
 
   const handleDeleteTask = async (taskId: number) => {
     setDeletingTaskId(taskId);
-
+  
     try {
       // Remove from localStorage first
       const localTasks = JSON.parse(localStorage.getItem('tasks') || '[]');
-      const updatedLocalTasks = localTasks.filter((task: any) => task.id !== taskId);
+      const updatedLocalTasks = localTasks.filter((task: Task) => task.id !== taskId);
       localStorage.setItem('tasks', JSON.stringify(updatedLocalTasks));
       
       // Update the state immediately
       setTasks(updatedLocalTasks);
-
-      // Then delete from the server
-      const response = await fetch(`/api/tasks/${taskId}`, {
+      console.log('Task deleted from localStorage:', taskId);
+      // Send a DELETE request to the server
+      const response = await fetch('/api/tasks', {
         method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ taskId }), // Send taskId as JSON body
       });
-
+  
       if (!response.ok) {
-        console.error('Failed to delete task from server');
-        // If server fails, restore tasks from localStorage
+        const errorData = await response.json();
+        console.error('Failed to delete task from server:', errorData.error);
+        // If the server fails, restore tasks from localStorage
         setTasks(localTasks);
       }
-
-      window.location.reload();
     } catch (error) {
-      console.error('Failed to delete task', error);
+      console.error('Failed to delete task:', error);
       // Restore tasks from localStorage if there's an error
       const localTasks = JSON.parse(localStorage.getItem('tasks') || '[]');
       setTasks(localTasks);
     } finally {
       setDeletingTaskId(null);
+      window.location.reload(); // Reload the page to reflect changes
     }
   };
+  
 
   const getStatusColor = (status: ProgressStatus) => {
     switch(status) {
@@ -98,13 +103,6 @@ export default function TaskSidebar() {
       default:
         return 'bg-red-100 border-red-300';
     }
-  };
-
-  const handleAddTask = (newTask: Task) => {
-    // Update the state and localStorage when a new task is added
-    const updatedTasks = [...tasks, newTask];
-    setTasks(updatedTasks);
-    localStorage.setItem('tasks', JSON.stringify(updatedTasks));
   };
 
   return (

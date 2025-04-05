@@ -62,7 +62,6 @@ export async function POST(req: NextRequest) {
 export async function DELETE(request: NextRequest) {
   try {
     const { taskId } = await request.json(); // Assuming taskId is sent in the request body
-
     if (!taskId) {
       return NextResponse.json({ error: 'Task ID is required' }, { status: 400 });
     }
