@@ -1,12 +1,23 @@
 {
+  "version": 2,
   "builds": [
     {
-      "src": "src/pages/api/**",
-      "use": "@vercel/node"
+      "src": "package.json",
+      "use": "@vercel/next"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "/api/$1"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/$1"
     }
   ],
   "env": {
     "DATABASE_URL": "postgresql://tasky_r9sz_user:clofV5CGqwksTyf2hy5vxa1VGeubz9kT@dpg-cvj3etpr0fns73eb8hvg-a.oregon-postgres.render.com/tasky_r9sz"
   },
-  "buildCommand": "npm run prisma:generate"
+  "buildCommand": "npm run prisma:generate && npm run build"
 }
