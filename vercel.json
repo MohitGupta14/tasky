@@ -7,7 +7,7 @@
     ],
     "build": {
       "env": {
-        "DATABASE_URL": "@your-database-url"
+        "DATABASE_URL": "postgresql://tasky_r9sz_user:clofV5CGqwksTyf2hy5vxa1VGeubz9kT@dpg-cvj3etpr0fns73eb8hvg-a.oregon-postgres.render.com/tasky_r9sz"
       },
       "commands": {
         "build": "npm run prisma:generate"
