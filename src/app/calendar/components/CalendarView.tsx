@@ -20,6 +20,18 @@ export default function CalendarView() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    // Fetch tasks from localStorage first
+    const loadTasksFromLocalStorage = () => {
+      const storedTasks = JSON.parse(localStorage.getItem('tasks') || '[]');
+      if (storedTasks.length > 0) {
+        setTasks(storedTasks);
+        setIsLoading(false);
+      } else {
+        // If no tasks in localStorage, fetch from the server
+        fetchTasks();
+      }
+    };
+
     const fetchTasks = async () => {
       setIsLoading(true);
       try {
@@ -27,19 +39,20 @@ export default function CalendarView() {
         if (response.ok) {
           const data = await response.json();
           setTasks(data);
+          // Store the fetched tasks in localStorage for future use
+          localStorage.setItem('tasks', JSON.stringify(data));
         }
       } catch (error) {
         console.error('Failed to fetch tasks', error);
       } finally {
-        // Add a small delay to make the loader visible even on fast connections
         setTimeout(() => {
           setIsLoading(false);
         }, 500);
       }
     };
 
-    fetchTasks();
-  }, [currentMonth]); // Refetch when month changes
+    loadTasksFromLocalStorage(); // Try loading tasks from localStorage
+  }, [currentMonth]); // Refetch tasks when month changes
 
   const generateCalendarDays = () => {
     const start = startOfWeek(startOfMonth(currentMonth));
@@ -164,12 +177,6 @@ export default function CalendarView() {
                     <div className="text-xs text-gray-400 text-center"></div>
                   )}
                 </div>
-                
-                {/* {tasksOnDay.length > 0 && (
-                  <div className="flex justify-center mt-1">
-                    <span className="text-xs font-medium text-blue-600">{tasksOnDay.length} task{tasksOnDay.length !== 1 ? 's' : ''}</span>
-                  </div>
-                )} */}
               </div>
             );
           })
@@ -188,6 +195,8 @@ export default function CalendarView() {
                 if (response.ok) {
                   const data = await response.json();
                   setTasks(data);
+                  // Store the fetched tasks in localStorage for future use
+                  localStorage.setItem('tasks', JSON.stringify(data));
                 }
               } catch (error) {
                 console.error('Failed to fetch tasks', error);
